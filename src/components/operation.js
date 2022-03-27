@@ -499,6 +499,7 @@ export const OPERATION_FIELDS = {
     laserPower: { name: 'laserPower', label: 'Laser Power', units: '%', input: NumberInput, ...checkPercent, contextMenu: FieldContextMenu() },
     laserPowerMin: { name: 'laserPowerMin', label: 'Laser Power Min', units: '%', input: NumberInput, ...checkRange(0, 100), contextMenu: FieldContextMenu() },
     laserPowerMax: { name: 'laserPowerMax', label: 'Laser Power Max', units: '%', input: NumberInput, ...checkRange(0, 100), contextMenu: FieldContextMenu() },
+    laserPowerCutoff: { name: 'laserPowerCutoff', label: 'Laser Power Cutoff', units: '%', input: NumberInput, ...checkRange(0, 100), contextMenu: FieldContextMenu() },
     laserDiameter: { name: 'laserDiameter', label: 'Laser Diameter', units: 'mm', input: NumberInput, ...checkPositive, contextMenu: FieldContextMenu() },
     lineDistance: { name: 'lineDistance', label: 'Line Distance', units: 'mm', input: NumberInput, ...checkPositive, contextMenu: FieldContextMenu() },
     lineAngle: { name: 'lineAngle', label: 'Line Angle', units: 'deg', input: NumberInput, contextMenu: FieldContextMenu() },
@@ -537,6 +538,7 @@ export const OPERATION_FIELDS = {
     trimLine: { name: 'trimLine', label: 'Trim Pixels', units: '', input: ToggleInput, contextMenu: FieldContextMenu() },                                // lw.raster-to-gcode: Trim trailing white pixels
     joinPixel: { name: 'joinPixel', label: 'Join Pixels', units: '', input: ToggleInput, contextMenu: FieldContextMenu() },  // lw.raster-to-gcode: Join consecutive pixels with same intensity
     burnWhite: { name: 'burnWhite', label: 'Burn White', units: '', input: ToggleInput, contextMenu: FieldContextMenu() },   // lw.raster-to-gcode: [true = G1 S0 | false = G0] on inner white pixels
+    laserIntensity: { name: 'laserIntensity', label: 'Laser Intensity', units: '', input: ToggleInput, contextMenu: FieldContextMenu() },
     verboseGcode: { name: 'verboseGcode', label: 'Verbose GCode', units: '', input: ToggleInput },                      // lw.raster-to-gcode: Output verbose GCode (print each commands)
     vertical: { name: 'vertical', label: 'Vertical', units: '', input: ToggleInput, contextMenu: FieldContextMenu() },       // lw.raster-to-gcode: Go Vertically or reverse diagonally
     diagonal: { name: 'diagonal', label: 'Diagonal', units: '', input: ToggleInput, contextMenu: FieldContextMenu() },       // lw.raster-to-gcode: Go diagonally (increase the distance between points)
@@ -582,19 +584,19 @@ export const OPERATION_TYPES = {
     'Laser Cut': { allowTabs: true, tabFields: false, fields: ['name', 'filterFillColor', 'filterStrokeColor', 'laserPower', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useA', 'aAxisDiameter', 'useBlower', 'segmentLength', ...OPERATION_GROUPS.Macros.fields] },
     'Laser Cut Inside': { allowTabs: true, tabFields: false, fields: ['name', 'filterFillColor', 'filterStrokeColor', 'laserDiameter', 'laserPower', 'margin', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useA', 'aAxisDiameter', 'useBlower', 'segmentLength', ...OPERATION_GROUPS.Macros.fields] },
     'Laser Cut Outside': { allowTabs: true, tabFields: false, fields: ['name', 'filterFillColor', 'filterStrokeColor', 'laserDiameter', 'laserPower', 'margin', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useA', 'aAxisDiameter', 'useBlower', 'segmentLength', ...OPERATION_GROUPS.Macros.fields] },
-    'Laser Fill Path': { allowTabs: false, tabFields: false, fields: ['name', 'filterFillColor', 'filterStrokeColor', 'lineDistance', 'lineAngle', 'laserPower', 'margin', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useA', 'aAxisDiameter', 'useBlower', ...OPERATION_GROUPS.Macros.fields] },
+    'Laser Fill Path': { allowTabs: false, tabFields: false, fields: ['name', 'filterFillColor', 'filterStrokeColor', 'lineDistance', 'lineAngle', 'laserIntensity', 'laserPower', 'margin', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useA', 'aAxisDiameter', 'useBlower', ...OPERATION_GROUPS.Macros.fields] },
     'Laser Raster': {
         allowTabs: false, tabFields: false, fields: [
-            'name', 'laserPowerMin', 'laserPowerMax', 'laserDiameter', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useBlower',
-            'trimLine', 'joinPixel', 'burnWhite', 'verboseGcode', 'vertical', 'diagonal', 'overScan', 'useA', 'aAxisDiameter',
+            'name', 'laserPowerMin', 'laserPowerMax', 'laserPowerCutoff', 'laserDiameter', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useBlower',
+            'trimLine', 'joinPixel', 'laserIntensity', 'burnWhite', 'verboseGcode', 'vertical', 'diagonal', 'overScan', 'useA', 'aAxisDiameter',
             ...OPERATION_GROUPS.Filters.fields, ...OPERATION_GROUPS.Macros.fields
         ]
     },
     'Laser Raster Merge': {
         allowTabs: false, tabFields: false, fields: [
             'name', 'filterFillColor', 'filterStrokeColor',
-            'laserPowerMin', 'laserPowerMax', 'laserDiameter', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useBlower',
-            'trimLine', 'joinPixel', 'burnWhite', 'verboseGcode', 'vertical', 'diagonal', 'overScan', 'useA', 'aAxisDiameter',
+            'laserPowerMin', 'laserPowerMax', 'laserPowerCutoff', 'laserDiameter', 'passes', 'passDepth', 'startHeight', 'cutRate', 'useBlower',
+            'trimLine', 'joinPixel', 'laserIntensity', 'burnWhite', 'verboseGcode', 'vertical', 'diagonal', 'overScan', 'useA', 'aAxisDiameter',
             ...OPERATION_GROUPS.Filters.fields, ...OPERATION_GROUPS.Macros.fields
         ]
     },

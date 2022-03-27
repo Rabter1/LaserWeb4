@@ -16,6 +16,7 @@ class RasterToGcode extends CanvasGrid {
 
             beamRange: { min: 0, max: 1 },   // Beam power range (Firmware value)
             beamPower: { min: 0, max: 100 }, // Beam power (S value) as percentage of beamRange
+            beamCutoff: 0,                   // Beam cutoff when power is below given percentage
 
             milling  : false, // EXPERIMENTAL
             zSafe    : 5,     // Safe Z for fast move
@@ -23,14 +24,15 @@ class RasterToGcode extends CanvasGrid {
             zDepth   : -10,   // Z depth (black pixels)
             passDepth: 1,     // Pass depth in millimeters
 
-            offsets  : { X: 0, Y: 0 }, // Global coordinates offsets
-            trimLine : true,           // Trim trailing white pixels
-            joinPixel: true,           // Join consecutive pixels with same intensity
-            burnWhite: true,           // [true = G1 S0 | false = G0] on inner white pixels
-            verboseG : false,          // Output verbose GCode (print each commands)
-            vertical : false,          // Go vertically / reverse diagonal
-            diagonal : false,          // Go diagonally (increase the distance between points)
-            overscan : 0,              // Add some extra white space (in millimeters) before and after each line
+            offsets         : { X: 0, Y: 0 }, // Global coordinates offsets
+            trimLine        : true,           // Trim trailing white pixels
+            joinPixel       : true,           // Join consecutive pixels with same intensity
+            burnWhite       : true,           // [true = G1 S0 | false = G0] on inner white pixels
+            laserIntensity  : true,
+            verboseG        : false,          // Output verbose GCode (print each commands)
+            vertical        : false,          // Go vertically / reverse diagonal
+            diagonal        : false,          // Go diagonally (increase the distance between points)
+            overscan        : 0,              // Add some extra white space (in millimeters) before and after each line
 
             precision: { X: 2, Y: 2, S: 4 }, // Number of decimals for each commands
 
@@ -229,14 +231,21 @@ class RasterToGcode extends CanvasGrid {
             )
         }
         else {
-            this.gcode.push(
-                '; Beam range : ' + this.beamRange.min + ' to ' + this.beamRange.max,
-                '; Beam power : ' + this.beamPower.min + ' to ' + this.beamPower.max + ' %'
-            )
+            if (this.laserIntensity) {
+                this.gcode.push(
+                    '; Beam range : ' + this.beamRange.min + ' to ' + this.beamRange.max,
+                    '; Beam power : ' + this.beamPower.min + ' to ' + this.beamPower.max + ' %',
+                    //'; Beam cutoff : ' + this.beamCutOff + ' %',
+                )
+            } else {
+                this.gcode.push(
+                    '; Beam power : no laser intensity - only Laser ON/OFF - (needs to be defined in Settings - Gcode)' 
+                )
+            }
         }
 
         // Print activated options
-        let options = ['smoothing', 'trimLine', 'joinPixel', 'burnWhite', 'verboseG', 'vertical', 'diagonal']
+        let options = ['smoothing', 'trimLine', 'joinPixel', 'laserIntensity', 'burnWhite', 'verboseG', 'vertical', 'diagonal']
 
         for (var i = options.length - 1; i >= 0; i--) {
             if (! this[options[i]]) {
@@ -311,7 +320,12 @@ class RasterToGcode extends CanvasGrid {
             let pixel = this.getPixel(x, y)
 
             // Reversed gray value [ 0 = white | 255 = black ]
-            return 255 - pixel.gray
+            let power = 255 - pixel.gray;
+            
+            //Cutoff laser power if set in settings (settings is 0 - 100 value is 0 - 255)
+            power = ((this.beamCutoff * 2.55) <= power) ? power : 0;
+
+            return power
         }
         catch (error) {
             if (arguments.length === 3) {
